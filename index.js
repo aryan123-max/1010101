@@ -8,7 +8,10 @@ const { TOKEN, PREFIX, LOCALE } = require("./util/EvobotUtil");
 const path = require("path");
 const i18n = require("i18n");
 
-const client = new Client({ 
+const { DiscordTogether } = require('discord-together')
+client.discordTogether = new DiscordTogether(client);
+
+const client = new Client({
   disableMentions: "everyone",
   restTimeOffset: 0
 });
@@ -54,6 +57,19 @@ client.on("ready", () => {
 });
 client.on("warn", (info) => console.log(info));
 client.on("error", console.error);
+
+// Message Event
+client.on('messageCreate', async (message) => {
+  if (message.content === '1youtube') {
+    if (message.member.voice.channel) {
+      client.discordTogether.createTogetherCode(message.member.voice.channel.id, 'youtube').then(async invite => {
+        return message.channel.send(`${invite.code}`);
+      })
+    } else {
+      message.reply('Join a Voice Channel noob!')
+    }
+  }
+})
 
 /**
  * Import all commands
@@ -115,7 +131,7 @@ var http = require("http");
 
 //create a server object:
 http
-  .createServer(function(req, res) {
+  .createServer(function (req, res) {
     res.write("Ping! uptime"); //write a response to the client
     res.end(); //end the response
   })
